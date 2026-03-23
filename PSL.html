@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Pugnello Summer Cup 2026</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        sportdark: '#0f0f0f',
+                        sportcard: '#1a1a1a',
+                        sportaccent: '#00ff88',
+                        rankDiamante: '#00f2ff',
+                        rankOro: '#ffd700',
+                        rankArgento: '#c0c0c0',
+                        rankBronzo: '#cd7f32',
+                    },
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap');
+        
+        body {
+            background-color: #0f0f0f;
+            color: white;
+            font-family: 'Inter', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+            overscroll-behavior-y: contain;
+        }
+
+        .safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
+
+        .bg-diamante { background: linear-gradient(135deg, #004e52 0%, #00f2ff 100%); }
+        .bg-oro { background: linear-gradient(135deg, #7a5c00 0%, #ffd700 100%); }
+        .bg-argento { background: linear-gradient(135deg, #4a4a4a 0%, #c0c0c0 100%); }
+        .bg-bronzo { background: linear-gradient(135deg, #3d2b1f 0%, #cd7f32 100%); }
+
+        .text-rank-diamante { color: #00f2ff; }
+        .text-rank-oro { color: #ffd700; }
+        .text-rank-argento { color: #c0c0c0; }
+        .text-rank-bronzo { color: #cd7f32; }
+
+        @keyframes slideUp {
+            from { transform: translateY(100%); }
+            to { transform: translateY(0); }
+        }
+        .modal-animate { animation: slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        .active-tab { color: #00ff88 !important; }
+        .active-tab svg { stroke: #00ff88 !important; }
+    </style>
+</head>
+<body class="min-h-screen pb-24">
+
+    <!-- Header Mobile -->
+    <header class="sticky top-0 z-40 bg-sportdark/95 backdrop-blur-md border-b border-white/5 px-4 py-3">
+        <div class="flex justify-between items-center">
+            <div>
+                <p class="text-[10px] font-bold text-sportaccent uppercase tracking-[0.2em] leading-none">Pugnello 2026</p>
+                <h1 class="text-xl font-black uppercase italic tracking-tighter">Summer <span class="text-sportaccent">Cup</span></h1>
+            </div>
+            <div class="bg-sportcard border border-white/10 rounded-full px-3 py-1">
+                <span id="player-count-badge" class="text-xs font-black text-white">0/22</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Barra di ricerca mobile -->
+    <div id="search-container" class="px-4 py-3 sticky top-[60px] z-30 bg-sportdark/95 backdrop-blur-md">
+        <div class="relative">
+            <input type="text" id="search-input" placeholder="Cerca un campione..." 
+                class="w-full bg-sportcard border border-white/10 rounded-2xl px-5 py-3 text-sm focus:outline-none focus:ring-1 focus:ring-sportaccent transition-all text-white placeholder-gray-500">
+            <div class="absolute right-4 top-3.5 text-gray-500">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contenuto Principale -->
+    <main id="main-content" class="px-4 mt-2 space-y-10">
+        <!-- Renderizzato tramite JS -->
+    </main>
+
+    <!-- Navigazione Inferiore -->
+    <nav class="fixed bottom-0 left-0 right-0 z-50 bg-sportcard/90 backdrop-blur-xl border-t border-white/10 px-4 py-3 safe-bottom">
+        <div class="flex justify-between items-center max-w-lg mx-auto">
+            <button onclick="setGroupBy('role')" id="nav-role" class="flex flex-col items-center gap-1 active-tab transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+                <span class="text-[9px] font-bold uppercase tracking-tighter">Ruoli</span>
+            </button>
+            <button onclick="setGroupBy('rank')" id="nav-rank" class="flex flex-col items-center gap-1 text-gray-500 transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" /></svg>
+                <span class="text-[9px] font-bold uppercase tracking-tighter">Ranghi</span>
+            </button>
+            <button onclick="setGroupBy('matches')" id="nav-matches" class="flex flex-col items-center gap-1 text-gray-500 transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+                <span class="text-[9px] font-bold uppercase tracking-tighter">Partite</span>
+            </button>
+            <button onclick="showRules()" id="nav-rules" class="flex flex-col items-center gap-1 text-gray-500 transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                <span class="text-[9px] font-bold uppercase tracking-tighter">Regole</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Modal Giocatore -->
+    <div id="player-modal" class="fixed inset-0 z-[60] hidden overflow-hidden">
+        <div class="absolute inset-0 bg-black/80 backdrop-blur-md" onclick="closeModal()"></div>
+        <div class="absolute bottom-0 left-0 right-0 h-[92vh] bg-sportcard rounded-t-[32px] modal-animate overflow-y-auto no-scrollbar shadow-2xl flex flex-col border-t border-white/10">
+            <div class="w-12 h-1.5 bg-white/20 rounded-full mx-auto my-4 flex-shrink-0" onclick="closeModal()"></div>
+            
+            <div id="modal-header-bg" class="px-6 py-8 relative">
+                <div class="flex items-end gap-5">
+                    <div id="modal-img-container" class="w-32 h-32 rounded-2xl flex items-center justify-center border-4 border-white/20 shadow-2xl bg-sportdark text-5xl font-black italic">
+                        <!-- Iniziale renderizzata -->
+                    </div>
+                    <div class="flex-grow pb-2">
+                        <div class="flex flex-wrap gap-2 mb-2">
+                            <span id="modal-rank-text" class="text-[10px] font-black uppercase tracking-[0.2em] px-2 py-0.5 rounded bg-black/30 backdrop-blur-md text-white inline-block">Diamante</span>
+                            <span id="modal-role-text" class="text-[10px] font-black uppercase tracking-[0.2em] px-2 py-0.5 rounded bg-white/20 backdrop-blur-md text-white inline-block">Ruolo</span>
+                        </div>
+                        <h2 id="modal-name" class="text-3xl font-black uppercase tracking-tighter leading-none mb-1">Nome</h2>
+                        <div class="flex items-baseline gap-2">
+                            <span class="text-sportaccent text-4xl font-black tracking-tighter" id="modal-quote">0</span>
+                            <span class="text-white/40 text-xs font-bold uppercase tracking-widest">Quotazione</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="px-6 py-6 space-y-8 flex-grow pb-12 text-left">
+                <div class="grid grid-cols-3 gap-3">
+                    <div class="bg-sportdark p-3 rounded-2xl border border-white/5 text-center">
+                        <p class="text-[8px] font-bold text-gray-500 uppercase mb-1">Presenze</p>
+                        <p id="modal-matches" class="text-lg font-black text-white">-</p>
+                    </div>
+                    <div class="bg-sportdark p-3 rounded-2xl border border-white/5 text-center">
+                        <p class="text-[8px] font-bold text-gray-500 uppercase mb-1">Altezza</p>
+                        <p id="modal-height" class="text-lg font-black text-white">-</p>
+                    </div>
+                    <div class="bg-sportdark p-3 rounded-2xl border border-white/5 text-center">
+                        <p class="text-[8px] font-bold text-gray-500 uppercase mb-1">Anno</p>
+                        <p id="modal-year" class="text-lg font-black text-white">-</p>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="h-px bg-white/10 flex-grow"></div>
+                        <span class="text-[10px] font-black uppercase tracking-[0.3em] text-gray-500 italic">Analisi Tecnica</span>
+                        <div class="h-px bg-white/10 flex-grow"></div>
+                    </div>
+                    <p id="modal-bio" class="text-gray-300 leading-relaxed text-base italic bg-white/5 p-5 rounded-2xl border border-white/5 whitespace-pre-line"></p>
+                </div>
+                
+                <button onclick="closeModal()" class="w-full py-4 bg-white text-black rounded-2xl font-black uppercase tracking-widest text-sm active:scale-95 transition-transform">
+                    Chiudi Scheda
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Regolamento (Nascosto di default) -->
+    <div id="rules-content" class="hidden px-4 py-6 space-y-8 animate-in fade-in duration-500">
+        <div class="bg-sportaccent/10 border border-sportaccent/20 rounded-3xl p-6 mb-8 text-center">
+            <h2 class="text-2xl font-black uppercase italic tracking-tighter text-sportaccent">Regolamento Ufficiale</h2>
+            <p class="text-[10px] font-bold uppercase tracking-widest text-white/60 mt-2">Edizione Summer Cup 2026</p>
+        </div>
+
+        <div class="space-y-6">
+            <section class="bg-sportcard border border-white/5 rounded-2xl p-5">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="bg-sportaccent p-2 rounded-lg">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-black" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                    </div>
+                    <h3 class="text-lg font-black uppercase tracking-tight">Durata e Svolgimento</h3>
+                </div>
+                <ul class="space-y-3 text-sm text-gray-400 font-medium">
+                    <li class="flex gap-3"><span class="text-sportaccent">01.</span> Partite da due tempi da 20 minuti.</li>
+                    <li class="flex gap-3"><span class="text-sportaccent">02.</span> Intervallo di 5 minuti tra i tempi.</li>
+                    <li class="flex gap-3"><span class="text-sportaccent">03.</span> Numero minimo di giocatori: 5 per squadra.</li>
+                </ul>
+            </section>
+
+            <section class="bg-sportcard border border-white/5 rounded-2xl p-5">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="bg-sportaccent p-2 rounded-lg">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-black" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+                    </div>
+                    <h3 class="text-lg font-black uppercase tracking-tight">Fair Play e Condotta</h3>
+                </div>
+                <ul class="space-y-3 text-sm text-gray-400 font-medium">
+                    <li class="flex gap-3"><span class="text-sportaccent">!</span> Rispetto assoluto per l'avversario e la Piastra.</li>
+                    <li class="flex gap-3"><span class="text-sportaccent">!</span> Ogni forma di violenza porta all'espulsione immediata.</li>
+                    <li class="flex gap-3"><span class="text-sportaccent">!</span> Le decisioni degli organizzatori sono insindacabili.</li>
+                </ul>
+            </section>
+
+            <section class="bg-sportcard border border-white/5 rounded-2xl p-5">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="bg-sportaccent p-2 rounded-lg">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-black" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" /></svg>
+                    </div>
+                    <h3 class="text-lg font-black uppercase tracking-tight">Sistema a Ranghi</h3>
+                </div>
+                <div class="space-y-4">
+                    <div class="flex items-center justify-between bg-black/20 p-3 rounded-xl">
+                        <span class="text-xs font-black text-rankDiamante uppercase tracking-widest">Diamante</span>
+                        <span class="text-[10px] text-gray-500 font-bold italic">Top Player del Torneo</span>
+                    </div>
+                    <div class="flex items-center justify-between bg-black/20 p-3 rounded-xl">
+                        <span class="text-xs font-black text-rankOro uppercase tracking-widest">Oro</span>
+                        <span class="text-[10px] text-gray-500 font-bold italic">Giocatori di alto livello</span>
+                    </div>
+                    <div class="flex items-center justify-between bg-black/20 p-3 rounded-xl">
+                        <span class="text-xs font-black text-rankArgento uppercase tracking-widest">Argento</span>
+                        <span class="text-[10px] text-gray-500 font-bold italic">Giocatori solidi e costanti</span>
+                    </div>
+                    <div class="flex items-center justify-between bg-black/20 p-3 rounded-xl">
+                        <span class="text-xs font-black text-rankBronzo uppercase tracking-widest">Bronzo</span>
+                        <span class="text-[10px] text-gray-500 font-bold italic">Appassionati e nuovi talenti</span>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <script>
+        let currentGroupBy = 'role'; 
+        let searchQuery = '';
+        let isShowingRules = false;
+
+        const playersData = [
+            { id: 1, fullName: "Fongaro Mattia", lastName: "Fongaro", role: "esterno centrale", quote: 136, matchesAllTime: 27, year: 2005, height: "1.80m", foot: "Destro", rank: "diamante", bio: "• Fuoriclasse assoluto: agilità sovrumana e velocità d'esecuzione.\n• Tecnica individuale: doppio passo fulmineo e dribbling secco.\n• Visione totale: passaggi lunghi chirurgici e scambi stretti eccelsi.\n• Top Player: il diamante più prezioso e dominante del torneo." },
+            { id: 2, fullName: "Trzin Djordje", lastName: "Trzin", role: "pivot centrale", quote: 133, matchesAllTime: 226, year: 2004, height: "2.00m", foot: "Sinistro", rank: "diamante", bio: "• Titano insuperabile: agilità incredibile nonostante i due metri d'altezza.\n• Killer d'area: cinico sotto porta, trasforma ogni palla in gol.\n• Difensore aggiunto: protezione palla d'acciaio e recuperi fondamentali.\n• Arpionatore: capacità unica di calamitare palloni impossibili." },
+            { id: 3, fullName: "Dani Pietro", lastName: "Dani", role: "centrale", quote: 71, matchesAllTime: 203, year: 2005, height: "1.74m", foot: "Destro", rank: "argento", bio: "• Pilastro della difesa: un veterano che fa della lettura del gioco il suo punto di forza.\n• Affidabilità tecnica: giocatore solido che garantisce coperture precise e rilanci intelligenti.\n• Senso della posizione: eccellente marcatore, pulito negli interventi e costante nel rendimento." },
+            { id: 4, fullName: "Nicola Priante", lastName: "Priante", role: "esterno", quote: 125, matchesAllTime: 294, year: 2005, height: "1.78m", foot: "Sinistro", rank: "diamante", bio: "• Giocoliere d'area: dribbling secco e numeri tecnici d'alta scuola.\n• Balistica eccelsa: tiro potente e preciso dalla distanza.\n• Polivalente: abbina doti offensive a una buona fase difensiva e corsa costante." },
+            { id: 5, fullName: "Kevin Fracaro", lastName: "Fracaro", role: "centrale esterno", quote: 91, matchesAllTime: 183, year: 2005, height: "1.88m", foot: "Sinistro", rank: "diamante", bio: "• Muro difensivo: difensore estremamente forte e fisico, difficile da superare nell'uno contro uno.\n• Borseggiatore: specialista nel rubare palla all'avversario in modo quasi impercettibile.\n• Rapidità: dotato di una velocità notevole che gli permette recuperi prodigiosi." },
+            { id: 6, fullName: "Simone Rigoni", lastName: "Rigoni", role: "esterno", quote: 71, matchesAllTime: 288, year: 2005, height: "1.80m", foot: "Destro", rank: "argento", bio: "• Memoria storica: la sua conoscenza della piastra si traduce in un posizionamento tattico superiore.\n• Equilibratore: esterno che garantisce solidità tecnica in entrambe le fasi di gioco.\n• Visione collettiva: gioca per la squadra, facilitando la manovra con tocchi precisi." },
+            { id: 7, fullName: "Samuele Faedo", lastName: "Faedo", role: "centrale", quote: 103, matchesAllTime: 22, year: 2005, height: "1.77m", foot: "Destro", rank: "diamante", bio: "• Dappertutto: centrale solido e tuttofare che copre ogni centimetro di campo.\n• Motore inesauribile: corre sempre, garantendo un'intensità altissima per tutta la partita.\n• Affidabile: nonostante il basso numero di presenze storiche, dimostra una maturità tattica da veterano." },
+            { id: 8, fullName: "Umberto Cisco", lastName: "Cisco", role: "esterno", quote: 97, matchesAllTime: 84, year: "N/A", height: "1.70m", foot: "Destro", rank: "diamante", bio: "• Fulmine della fascia: velocissimo e letteralmente infaticabile.\n• Agilità estrema: si muove negli spazi stretti con una rapidità fuori dal comune.\n• Onnipresente: passa dappertutto in campo, garantendo supporto costante in ogni fase.\n• Mentalità vincente: se c'è qualcosa in palio, è il primo a prenderselo." },
+            { id: 9, fullName: "Matteo Gastaldello", lastName: "Gastaldello", role: "pivot", quote: 73, matchesAllTime: 163, year: 2005, height: "1.76m", foot: "Ambidestro", rank: "argento", bio: "• Regia offensiva: pivot esperto che eccelle nel gioco di sponda e nella gestione palla.\n• Intelligenza spaziale: sa sempre come muoversi per liberare varchi o ricevere palla pulita.\n• Qualità tattica: un riferimento sicuro per far salire la squadra con pulizia tecnica." },
+            { id: 10, fullName: "Davide Pretomartini", lastName: "Pretomartini", role: "esterno", quote: 125, matchesAllTime: 11, year: 2004, height: "1.72m", foot: "Destro", rank: "diamante", bio: "• Talento superiore: vanta un'esperienza consolidata con le prime squadre nonostante le poche presenze in piastra.\n• Cecchino: doti balistiche impressionanti, estremamente pericoloso dalla distanza.\n• Qualità di categoria: tecnica individuale e visione di gioco da top player assoluto." },
+            { id: 11, fullName: "Alberto Olivieri", lastName: "Olivieri", role: "esterno centrale", quote: 127, matchesAllTime: 78, year: 2008, height: "1.80m", foot: "Destro", rank: "diamante", bio: "• Controllo palla: eccelso, gioca con la palla letteralmente attaccata ai piedi.\n• Dribbling: ottimo saltatore d'uomo, capace di creare superiorità numerica con facilità.\n• Giovane Promessa: classe 2008 con una maturità tecnica già da rango diamante." },
+            { id: 12, fullName: "Pietro Volpiana", lastName: "Volpiana", role: "pivot", quote: 73, matchesAllTime: 91, year: 2005, height: "1.85m", foot: "Destro", rank: "argento", bio: "• Struttura e classe: pivot fisico che sa abbinare la forza a una buona proprietà di palleggio.\n• Pivot boa: eccellente nel far salire il baricentro della squadra difendendo palla con efficacia.\n• Concreto: un pericolo costante che sa trasformare le palle sporche in occasioni." },
+            { id: 13, fullName: "Elia Roviaro", lastName: "Roviaro", role: "centrale esterno", quote: 56, matchesAllTime: 92, year: 2005, height: "1.79m", foot: "Destro", rank: "argento", bio: "• Jolly di qualità: giocatore tatticamente ordinato, capace di coprire più ruoli con competenza.\n• Ordine e disciplina: garantisce una fase difensiva pulita senza mai eccedere nel rischio.\n• Pilastro del gruppo: porta equilibrio e un'ottima attitudine al gioco collettivo." },
+            { id: 14, fullName: "Samuele Noro", lastName: "Noro", role: "pivot", quote: 85, matchesAllTime: 229, year: 2005, height: "1.76m", foot: "Destro", rank: "oro", bio: "• El Kun Aguero: soprannominato così per il baricentro basso e la ferocia sotto porta.\n• Cannoniere: vanta probabilmente il tiro più potente e spaventoso di tutto Pugnello.\n• Veterano d'area: la sua enorme esperienza lo rende una minaccia costante." },
+            { id: 15, fullName: "Mattia Priante", lastName: "M. Priante", role: "centrale", quote: 110, matchesAllTime: 42, year: 2007, height: "1.80m", foot: "Destro", rank: "diamante", bio: "• Pulizia tecnica: difensore dall'eleganza rara, gioca sempre a testa alta con precisione svizzera.\n• Smistatore eccelso: abilissimo nel far girare palla e dettare i tempi della manovra.\n• DNA Pro: porta in piastra una mentalità professionale e un tempismo negli interventi di altissimo livello." },
+            { id: 16, fullName: "Pirolo", lastName: "Pirolo", role: "centrale pivot", quote: 87, matchesAllTime: 86, year: 2004, height: "1.92m", foot: "Destro", rank: "oro", bio: "• Gigante tecnico: unisce una stazza imponente a una qualità palla al piede insospettabile.\n• Mastro del Futsal: profondo conoscitore delle dinamiche del gioco, sa sempre dove trovarsi.\n• Esperto: con quasi 90 partite alle spalle è una certezza tattica assoluta." },
+            { id: 17, fullName: "Alessandro Mattiello", lastName: "Mattiello", role: "centrale esterno", quote: 74, matchesAllTime: 178, year: 2004, height: "1.81m", foot: "Destro", rank: "argento", bio: "• Giocatore d'ordine: garantisce una copertura costante e una gestione del possesso semplice e senza errori.\n• Versatilità normale: si alterna tra centro e fascia svolgendo il suo compito con diligenza tattica.\n• Affidabile: un elemento solido della piastra che offre un rendimento costante e prevedibile.\n• Disciplinato: gioca per la squadra prediligendo la sostanza e il posizionamento corretto." },
+            { id: 18, fullName: "Nicola Boschetto", lastName: "Boschetto", role: "esterno centrale", quote: 64, matchesAllTime: 71, year: 2004, height: "1.77m", foot: "Destro", rank: "argento", bio: "• Marcatore diligente: si concentra sul contenimento dell'avversario con pazienza e dedizione.\n• Elemento di equilibrio: mette la sua disponibilità al servizio del gruppo per mantenere le posizioni.\n• Esperience solida: rappresenta un profilo affidabile che conosce bene i propri compiti.\n• Concreto: predilige la giocata sicura e la marcatura stretta, garantendo una difesa ordinata." },
+            { id: 19, fullName: "Marco Belloni", lastName: "Belloni", role: "pivot", quote: 39, matchesAllTime: 172, year: 2004, height: "1.73m", foot: "Destro", rank: "bronzo", bio: "• Spirito di sacrificio: un giocatore che mette l'impegno e il cuore in ogni singola azione.\n• Gioco d'appoggio: lavora in modo semplice per i compagni, cercando sempre lo scarico più vicino.\n• Umiltà e Costanza: un gregario silenzioso che garantisce la sua presenza su ogni pallone vagante.\n• Disciplinato: segue le indicazioni del capitano con grande disponibilità, lavorando per il bene collettivo." },
+            { id: 20, fullName: "Matteo Parise", lastName: "Parise", role: "esterno", quote: 87, matchesAllTime: 42, year: 2009, height: "1.82m", foot: "Destro", rank: "oro", bio: "• Esplosività: talento emergente del 2009 dotato di uno scatto bruciante e grande forza fisica.\n• Dribbling ubriacante: eccelle nell'uno contro uno, usando la tecnica per smarcarsi e trovare lo spazio per il tiro.\n• Futuro d'oro: nonostante la giovane età, mostra una determinazione e una capacità di incidere tipica dei veterani." },
+            { id: 21, fullName: "Edoardo Savoiani", lastName: "Savoiani", role: "portiere", quote: 38, matchesAllTime: 89, year: 2005, height: "1.83m", foot: "Destro", rank: "argento", bio: "• Guardiano affidabile: portiere solido che trasmette sicurezza a tutto il reparto difensivo.\n• Weekend Warrior: noto per la sua iconica 'faccia grave' durante i match del sabato e della domenica mattina, sinonimo di massima concentrazione.\n• Presenza costante: quasi 90 partite a protezione dei pali della Pugnello Cup." },
+            { id: 22, fullName: "Alessandro Tagliavalore", lastName: "Tagliavalore", role: "pivot", quote: 16, matchesAllTime: 76, year: 2004, height: "1.88m", foot: "Destro", rank: "bronzo", bio: "• Pragmatismo assoluto: pivot che fa della semplicità la sua arma migliore.\n• Sicurezza tattica: giocatore che non rischia mai la giocata superflua, preferendo sempre l'opzione più sicura per la squadra.\n• Fisicità: sfrutta i suoi 188cm per offrire un riferimento centrale stabile." },
+            { id: 23, fullName: "Filippo Fracaro", lastName: "F. Fracaro", role: "portiere", quote: 21, matchesAllTime: 36, year: 2005, height: "1.90m", foot: "Destro", rank: "bronzo", bio: "• Portiere volante: fisico imponente (190cm) abbinato a una grande attitudine al tuffo.\n• Buon senso della posizione: la sua altezza lo rende un ostacolo difficile da aggirare.\n• Dinamicità: nonostante la stazza, non esita a gettarsi su ogni pallone." },
+            { id: 24, fullName: "Ruis Golin", lastName: "Golin", role: "portiere", quote: 21, matchesAllTime: 49, year: 2005, height: "1.84m", foot: "Destro", rank: "bronzo", bio: "• Background multisport: porta l'esperienza del basket tra i pali, traducendola in un'ottima presa e gestione della palla con le mani.\n• Presa sicura: raramente respinge corto, preferendo bloccare il pallone e far ripartire la squadra.\n• Agilità: i trascorsi cestistici gli garantiscono un'ottima coordinazione." },
+            { id: 25, fullName: "Matteo Baldisserotto", lastName: "Baldisserotto", role: "portiere", quote: 57, matchesAllTime: 191, year: 2004, height: "1.88m", foot: "Destro", rank: "diamante", bio: "• Saracinesca storica: quasi 200 presenze lo rendono una leggenda della piastra.\n• Solidità assoluta: portiere estremamente concreto che sbaglia raramente la lettura dell'azione.\n• Istinto: doti atletiche eccellenti che gli permettono parate spettacolari in tuffo." },
+            { id: 26, fullName: "Tommaso Biasi", lastName: "Biasi", role: "portiere", quote: 48, matchesAllTime: 13, year: 2005, height: "1.73m", foot: "Destro", rank: "oro", bio: "• Specialista del Futsal: ha dedicato quasi tutta la vita alla disciplina specifica del calcetto.\n• Tecnica specifica: movimenti da portiere di calcio a 5 puro, eccelle nelle uscite a croce e nella reattività.\n• Qualità superiore: sebbene abbia poche presenze, il suo valore tecnico è indiscutibile." },
+            { id: 27, fullName: "Giovanni Vinoli", lastName: "Vinoli", role: "portiere", quote: 43, matchesAllTime: 36, year: 2006, height: "1.74m", foot: "Destro", rank: "oro", bio: "• Esperienza amatoriale: si forgia nei tornei amatoriali dell'UESSE Castello.\n• Affidabilità: portiere costante che sa gestire bene la tensione della partita.\n• Buon rendimento: garantisce sempre una prestazione di livello tra i pali." }
+        ];
+
+        const GROUP_CONFIG = {
+            role: { 
+                keys: ['portiere', 'centrale', 'esterno', 'pivot'], 
+                labels: { portiere: 'Portieri', centrale: 'Centrali', esterno: 'Esterni', pivot: 'Pivot' }, 
+                colors: { portiere: 'bg-blue-500', centrale: 'bg-yellow-500', esterno: 'bg-green-500', pivot: 'bg-red-500' } 
+            },
+            rank: { 
+                keys: ['diamante', 'oro', 'argento', 'bronzo'], 
+                labels: { diamante: 'Rango Diamante', oro: 'Rango Oro', argento: 'Rango Argento', bronzo: 'Rango Bronzo' }, 
+                colors: { diamante: 'bg-rankDiamante', oro: 'bg-rankOro', argento: 'bg-rankArgento', bronzo: 'bg-rankBronzo' } 
+            },
+            matches: { 
+                keys: ['veterano', 'esperto', 'debuttante'], 
+                labels: { veterano: 'Veterani (+100 P)', esperto: 'Esperti (30-100 P)', debuttante: 'Debuttanti (<30 P)' }, 
+                colors: { veterano: 'bg-purple-500', esperto: 'bg-blue-500', debuttante: 'bg-emerald-500' } 
+            }
+        };
+
+        function getRankColorHex(rank) {
+            switch(rank.toLowerCase()) {
+                case 'diamante': return '#00f2ff';
+                case 'oro': return '#ffd700';
+                case 'argento': return '#c0c0c0';
+                case 'bronzo': return '#cd7f32';
+                default: return '#ffffff';
+            }
+        }
+
+        function getRankTextColorClass(rank) {
+            switch(rank.toLowerCase()) {
+                case 'diamante': return 'text-rankDiamante';
+                case 'oro': return 'text-rankOro';
+                case 'argento': return 'text-rankArgento';
+                case 'bronzo': return 'text-rankBronzo';
+                default: return 'text-white';
+            }
+        }
+
+        function formatRole(role) {
+            return role.split(' ').join(' / ');
+        }
+
+        function setGroupBy(type) {
+            isShowingRules = false;
+            currentGroupBy = type;
+            
+            // Gestione UI
+            document.getElementById('search-container').classList.remove('hidden');
+            document.getElementById('main-content').classList.remove('hidden');
+            document.getElementById('rules-content').classList.add('hidden');
+
+            document.querySelectorAll('nav button').forEach(btn => btn.classList.remove('active-tab', 'text-gray-500'));
+            document.querySelectorAll('nav button').forEach(btn => btn.classList.add('text-gray-500'));
+            
+            const activeBtn = document.getElementById(`nav-${type}`);
+            activeBtn.classList.add('active-tab');
+            activeBtn.classList.remove('text-gray-500');
+
+            renderView();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function showRules() {
+            isShowingRules = true;
+            
+            // Gestione UI
+            document.getElementById('search-container').classList.add('hidden');
+            document.getElementById('main-content').classList.add('hidden');
+            document.getElementById('rules-content').classList.remove('hidden');
+
+            document.querySelectorAll('nav button').forEach(btn => btn.classList.remove('active-tab', 'text-gray-500'));
+            document.querySelectorAll('nav button').forEach(btn => btn.classList.add('text-gray-500'));
+            
+            const rulesBtn = document.getElementById('nav-rules');
+            rulesBtn.classList.add('active-tab');
+            rulesBtn.classList.remove('text-gray-500');
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        document.getElementById('search-input').addEventListener('input', (e) => {
+            searchQuery = e.target.value.toLowerCase();
+            renderView();
+        });
+
+        function renderView() {
+            if (isShowingRules) return;
+
+            const main = document.getElementById('main-content');
+            main.innerHTML = '';
+            const config = GROUP_CONFIG[currentGroupBy];
+            const filtered = playersData.filter(p => p.fullName.toLowerCase().includes(searchQuery));
+
+            config.keys.forEach(key => {
+                const group = filtered.filter(p => {
+                    if (currentGroupBy === 'role') return p.role.includes(key);
+                    if (currentGroupBy === 'rank') return p.rank === key;
+                    if (currentGroupBy === 'matches') {
+                        if (key === 'veterano') return p.matchesAllTime >= 100;
+                        if (key === 'esperto') return p.matchesAllTime >= 30 && p.matchesAllTime < 100;
+                        return p.matchesAllTime < 30;
+                    }
+                });
+
+                if (group.length > 0) {
+                    const section = document.createElement('div');
+                    section.innerHTML = `
+                        <div class="flex items-center gap-3 mb-5">
+                            <span class="w-1.5 h-4 ${config.colors[key]} rounded-full"></span>
+                            <h2 class="text-[10px] font-black uppercase tracking-[0.3em] text-white/40">${config.labels[key]}</h2>
+                        </div>
+                        <div class="grid grid-cols-1 gap-3">
+                            ${group.map(p => `
+                                <div onclick="openModal(${p.id})" class="bg-sportcard border border-white/5 rounded-2xl p-4 flex items-center gap-4 active:bg-white/5 transition-colors">
+                                    <div class="w-14 h-14 rounded-xl flex items-center justify-center bg-sportdark text-2xl font-black italic" style="color: ${getRankColorHex(p.rank)}">
+                                        ${p.lastName.charAt(0)}
+                                    </div>
+                                    <div class="flex-grow">
+                                        <h3 class="font-black text-sm uppercase tracking-tight ${getRankTextColorClass(p.rank)}">${p.fullName}</h3>
+                                        <div class="flex flex-wrap items-center gap-2 mt-1">
+                                            <span class="text-[8px] font-black uppercase bg-white/5 px-2 py-0.5 rounded text-white/60">${p.rank}</span>
+                                            <span class="text-[8px] font-bold text-sportaccent uppercase tracking-tighter">${formatRole(p.role)}</span>
+                                            <span class="text-[8px] font-medium text-white/30">• ${p.matchesAllTime} P</span>
+                                        </div>
+                                    </div>
+                                    <div class="text-right">
+                                        <p class="text-lg font-black tracking-tighter text-white">${p.quote}</p>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    `;
+                    main.appendChild(section);
+                }
+            });
+
+            document.getElementById('player-count-badge').innerText = `${filtered.length}/${playersData.length}`;
+        }
+
+        function openModal(id) {
+            const p = playersData.find(x => x.id === id);
+            const modal = document.getElementById('player-modal');
+            
+            document.getElementById('modal-header-bg').className = `px-6 py-8 relative bg-${p.rank}`;
+            document.getElementById('modal-rank-text').innerText = p.rank;
+            
+            const imgContainer = document.getElementById('modal-img-container');
+            imgContainer.innerText = p.lastName.charAt(0);
+            imgContainer.style.color = getRankColorHex(p.rank);
+
+            document.getElementById('modal-role-text').innerText = formatRole(p.role);
+            document.getElementById('modal-name').innerText = p.fullName;
+            document.getElementById('modal-name').className = `text-3xl font-black uppercase tracking-tighter leading-none mb-1 text-white`;
+            
+            document.getElementById('modal-quote').innerText = p.quote;
+            document.getElementById('modal-matches').innerText = p.matchesAllTime;
+            document.getElementById('modal-height').innerText = p.height || 'N/A';
+            document.getElementById('modal-year').innerText = p.year || 'N/A';
+            document.getElementById('modal-bio').innerText = p.bio;
+
+            modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal() {
+            document.getElementById('player-modal').classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        }
+
+        window.onload = renderView;
+    </script>
+</body>
+</html>```
+
+
